@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createAuthUserWithEmailAndPassword, createUserDocumentFromAuth } from "../../utils/firebase/firebase.utils";
 
 const defaultFormFields = {
     displayName:'',
@@ -18,11 +19,34 @@ const SignUp = () => {
         const { name,value } = event.target;
         setFormFields({...formFields, [name]:value});
     }
+    
+    const resetFormFields = () => {
+      setFormFields(defaultFormFields);
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if(password !== confirmPassword) {
+            alert('Password is incorrect');
+        }
+        else{
+          try {
+            const { user } = await createAuthUserWithEmailAndPassword(email,password);
+            await createUserDocumentFromAuth(user,{displayName});
+            resetFormFields();
+          } catch (error) {
+            if(error.code === 'auth/email-already-in-use'){
+              alert('Email Already Exist');
+            }
+            console.log('User creation error' + error);
+          }
+        } 
+    }
 
     return (
         <div>
             <h2>Sign Up with your email and password</h2>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <label>Display Name</label>
                 <input 
                   type="text"
