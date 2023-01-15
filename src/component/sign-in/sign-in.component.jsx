@@ -3,6 +3,7 @@ import {
   createAuthUserWithEmailAndPassword,
   createSignInUserWithEmailAndPassword,
   createUserDocumentFromAuth,
+  signInWithGooglePopup,
 } from "../../utils/firebase/firebase.utils";
 import FormInput from "../form-input/form-input.component";
 import Button from "../button/button.component";
@@ -30,14 +31,18 @@ const SignIn = ({ logGoogleUser }) => {
     setFormFields(defaultFormFields);
   };
 
+  const signInWithGoogle = async () => {
+    const {user} = await signInWithGooglePopup();
+    createUserDocumentFromAuth(user);
+  } 
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await createSignInUserWithEmailAndPassword(
+      const {user} = await createSignInUserWithEmailAndPassword(
         email,
         password
       );
-      console.log(response);
       resetFormFields();
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
@@ -69,7 +74,7 @@ const SignIn = ({ logGoogleUser }) => {
         />
         <div className="button-group">
           <Button type="submit">Sign In</Button>
-          <Button onClick={logGoogleUser} buttonType="google" type="submit">
+          <Button onClick={signInWithGoogle} buttonType="google" type="submit">
             Google Sign In
           </Button>
         </div>
